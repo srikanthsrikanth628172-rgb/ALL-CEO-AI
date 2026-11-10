@@ -1,0 +1,6 @@
+{
+  "name": "MY AI SUPERSTAR",
+  "description": "Personal AI company command center for solo founders to plan and manage software projects and AI agents.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
