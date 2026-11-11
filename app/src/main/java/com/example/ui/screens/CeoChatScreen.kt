@@ -26,6 +26,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.FactCheck
 import androidx.compose.material.icons.automirrored.filled.Send
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.ElectricBolt
@@ -34,7 +35,9 @@ import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.SmartToy
+import androidx.compose.material.icons.filled.Videocam
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.FilterChip
@@ -86,11 +89,13 @@ import java.util.Locale
 fun CeoChatScreen(
   chatMessages: List<ChatMessageEntity>,
   activePersona: String,
+  selectedModel: String = "gemini-3.8-flash",
   chatInput: String,
   isGenerating: Boolean,
   errorMessage: String?,
   aiService: GeminiAiService,
   onPersonaSelect: (String) -> Unit,
+  onModelSelect: (String) -> Unit = {},
   onInputChange: (String) -> Unit,
   onSendMessage: (customPrompt: String?) -> Unit,
   onApprovePlan: (ChatMessageEntity) -> Unit,
@@ -180,6 +185,74 @@ fun CeoChatScreen(
               borderColor = if (isSelected) CyberCyan else NeonBorder
             ),
             modifier = Modifier.testTag("persona_chip_${persona.replace(" ", "_")}")
+          )
+        }
+      }
+
+      Spacer(modifier = Modifier.height(4.dp))
+
+      // Gemini Model Selection Row
+      Row(
+        modifier = Modifier
+          .fillMaxWidth()
+          .padding(horizontal = 16.dp, vertical = 2.dp),
+        verticalAlignment = Alignment.CenterVertically
+      ) {
+        Icon(
+          imageVector = Icons.Default.AutoAwesome,
+          contentDescription = null,
+          tint = ElectricPurple,
+          modifier = Modifier.size(14.dp)
+        )
+        Spacer(modifier = Modifier.width(6.dp))
+        Text(
+          text = "GEMINI MODEL ENGINE",
+          style = MaterialTheme.typography.labelSmall.copy(
+            letterSpacing = 1.sp,
+            fontWeight = FontWeight.Bold,
+            fontSize = 9.sp
+          ),
+          color = TextMuted
+        )
+      }
+
+      LazyRow(
+        contentPadding = PaddingValues(horizontal = 16.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = Modifier.padding(top = 2.dp, bottom = 4.dp)
+      ) {
+        val models = listOf(
+          "gemini-3.8-flash" to "3.8 Flash (General)",
+          "gemini-4-carbon" to "4 Carbon (Deep Reasoning)",
+          "gemini-4-argon" to "4 Argon (Complex Tasks)",
+          "gemini-3.1-flash-lite" to "3.1 Lite (Fast Dispatch)"
+        )
+        items(models) { (modelId, label) ->
+          val isSelected = selectedModel == modelId
+          FilterChip(
+            selected = isSelected,
+            onClick = { onModelSelect(modelId) },
+            label = {
+              Text(
+                text = label,
+                style = MaterialTheme.typography.labelSmall.copy(
+                  fontSize = 10.sp,
+                  fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+                )
+              )
+            },
+            colors = FilterChipDefaults.filterChipColors(
+              selectedContainerColor = ElectricPurple.copy(alpha = 0.25f),
+              selectedLabelColor = ElectricPurple,
+              containerColor = DarkSurfaceCard,
+              labelColor = TextSecondary
+            ),
+            border = FilterChipDefaults.filterChipBorder(
+              enabled = true,
+              selected = isSelected,
+              borderColor = if (isSelected) ElectricPurple else NeonBorder
+            ),
+            modifier = Modifier.testTag("model_chip_${modelId.replace(".", "_").replace("-", "_")}")
           )
         }
       }
@@ -362,71 +435,172 @@ fun CeoChatScreen(
       }
     }
 
-    // 3.5 Intelligence Superpowers (Google Search Grounding & Voice Conversations)
-    Row(
+    // 3.5 Intelligence Superpowers (Google Search, Maps Grounding, Voice & Video Briefings)
+    LazyRow(
       modifier = Modifier
         .fillMaxWidth()
-        .padding(horizontal = 16.dp, vertical = 4.dp),
+        .padding(vertical = 4.dp),
+      contentPadding = PaddingValues(horizontal = 16.dp),
       horizontalArrangement = Arrangement.spacedBy(8.dp),
       verticalAlignment = Alignment.CenterVertically
     ) {
-      Box(
-        modifier = Modifier
-          .clip(RoundedCornerShape(8.dp))
-          .background(CyberCyan.copy(alpha = 0.12f))
-          .border(1.dp, CyberCyan.copy(alpha = 0.4f), RoundedCornerShape(8.dp))
-          .clickable {
-            val prefix = "Ground with latest tech & market documentation: "
-            if (!chatInput.startsWith(prefix)) {
-              onInputChange(prefix + chatInput)
+      item {
+        Box(
+          modifier = Modifier
+            .clip(RoundedCornerShape(8.dp))
+            .background(CyberCyan.copy(alpha = 0.12f))
+            .border(1.dp, CyberCyan.copy(alpha = 0.4f), RoundedCornerShape(8.dp))
+            .clickable {
+              val prefix = "Ground with Google Search data: "
+              if (!chatInput.startsWith(prefix)) {
+                onInputChange(prefix + chatInput)
+              }
             }
+            .padding(horizontal = 8.dp, vertical = 4.dp)
+            .testTag("grounding_search_chip")
+        ) {
+          Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(
+              imageVector = Icons.Default.Language,
+              contentDescription = null,
+              tint = CyberCyan,
+              modifier = Modifier.size(12.dp)
+            )
+            Spacer(modifier = Modifier.width(4.dp))
+            Text(
+              text = "Google Search Grounding: Active",
+              style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp, fontWeight = FontWeight.SemiBold),
+              color = CyberCyan
+            )
           }
-          .padding(horizontal = 8.dp, vertical = 4.dp)
-          .testTag("grounding_chip")
-      ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-          Icon(
-            imageVector = Icons.Default.Language,
-            contentDescription = null,
-            tint = CyberCyan,
-            modifier = Modifier.size(12.dp)
-          )
-          Spacer(modifier = Modifier.width(4.dp))
-          Text(
-            text = "Google Search Grounding: Active",
-            style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp, fontWeight = FontWeight.SemiBold),
-            color = CyberCyan
-          )
         }
       }
 
-      Box(
-        modifier = Modifier
-          .clip(RoundedCornerShape(8.dp))
-          .background(ElectricPurple.copy(alpha = 0.12f))
-          .border(1.dp, ElectricPurple.copy(alpha = 0.4f), RoundedCornerShape(8.dp))
-          .clickable {
-            val prefix = "Executive voice briefing format: "
-            if (!chatInput.startsWith(prefix)) {
-              onInputChange(prefix + chatInput)
+      item {
+        Box(
+          modifier = Modifier
+            .clip(RoundedCornerShape(8.dp))
+            .background(LaserGreen.copy(alpha = 0.12f))
+            .border(1.dp, LaserGreen.copy(alpha = 0.4f), RoundedCornerShape(8.dp))
+            .clickable {
+              val prefix = "Ground with Google Maps data for tech hubs & market ecosystems: "
+              if (!chatInput.startsWith(prefix)) {
+                onInputChange(prefix + chatInput)
+              }
             }
+            .padding(horizontal = 8.dp, vertical = 4.dp)
+            .testTag("grounding_maps_chip")
+        ) {
+          Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(
+              imageVector = Icons.Default.Place,
+              contentDescription = null,
+              tint = LaserGreen,
+              modifier = Modifier.size(12.dp)
+            )
+            Spacer(modifier = Modifier.width(4.dp))
+            Text(
+              text = "Google Maps Grounding: Active",
+              style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp, fontWeight = FontWeight.SemiBold),
+              color = LaserGreen
+            )
           }
-          .padding(horizontal = 8.dp, vertical = 4.dp)
-          .testTag("voice_mode_chip")
-      ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-          Icon(
-            imageVector = Icons.Default.Mic,
-            contentDescription = null,
-            tint = ElectricPurple,
-            modifier = Modifier.size(12.dp)
-          )
-          Spacer(modifier = Modifier.width(4.dp))
-          Text(
-            text = "Voice Briefing: Ready",
-            style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp, fontWeight = FontWeight.SemiBold),
-            color = ElectricPurple
-          )
+        }
+      }
+
+      item {
+        Box(
+          modifier = Modifier
+            .clip(RoundedCornerShape(8.dp))
+            .background(ElectricPurple.copy(alpha = 0.12f))
+            .border(1.dp, ElectricPurple.copy(alpha = 0.4f), RoundedCornerShape(8.dp))
+            .clickable {
+              val prefix = "Executive voice briefing format: "
+              if (!chatInput.startsWith(prefix)) {
+                onInputChange(prefix + chatInput)
+              }
+            }
+            .padding(horizontal = 8.dp, vertical = 4.dp)
+            .testTag("voice_mode_chip")
+        ) {
+          Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(
+              imageVector = Icons.Default.Mic,
+              contentDescription = null,
+              tint = ElectricPurple,
+              modifier = Modifier.size(12.dp)
+            )
+            Spacer(modifier = Modifier.width(4.dp))
+            Text(
+              text = "Voice Briefing: Ready",
+              style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp, fontWeight = FontWeight.SemiBold),
+              color = ElectricPurple
+            )
+          }
+        }
+      }
+
+      item {
+        Box(
+          modifier = Modifier
+            .clip(RoundedCornerShape(8.dp))
+            .background(WarningAmber.copy(alpha = 0.12f))
+            .border(1.dp, WarningAmber.copy(alpha = 0.4f), RoundedCornerShape(8.dp))
+            .clickable {
+              val prefix = "Generate 16:9 landscape video pitch script using gemini-omni-1.2-flash: "
+              if (!chatInput.startsWith(prefix)) {
+                onInputChange(prefix + chatInput)
+              }
+            }
+            .padding(horizontal = 8.dp, vertical = 4.dp)
+            .testTag("video_pitch_16_9_chip")
+        ) {
+          Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(
+              imageVector = Icons.Default.Videocam,
+              contentDescription = null,
+              tint = WarningAmber,
+              modifier = Modifier.size(12.dp)
+            )
+            Spacer(modifier = Modifier.width(4.dp))
+            Text(
+              text = "Video Pitch (16:9)",
+              style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp, fontWeight = FontWeight.SemiBold),
+              color = WarningAmber
+            )
+          }
+        }
+      }
+
+      item {
+        Box(
+          modifier = Modifier
+            .clip(RoundedCornerShape(8.dp))
+            .background(WarningAmber.copy(alpha = 0.12f))
+            .border(1.dp, WarningAmber.copy(alpha = 0.4f), RoundedCornerShape(8.dp))
+            .clickable {
+              val prefix = "Generate 9:16 portrait mobile video script using gemini-omni-1.2-flash: "
+              if (!chatInput.startsWith(prefix)) {
+                onInputChange(prefix + chatInput)
+              }
+            }
+            .padding(horizontal = 8.dp, vertical = 4.dp)
+            .testTag("video_mobile_9_16_chip")
+        ) {
+          Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(
+              imageVector = Icons.Default.Videocam,
+              contentDescription = null,
+              tint = WarningAmber,
+              modifier = Modifier.size(12.dp)
+            )
+            Spacer(modifier = Modifier.width(4.dp))
+            Text(
+              text = "Mobile Video (9:16)",
+              style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp, fontWeight = FontWeight.SemiBold),
+              color = WarningAmber
+            )
+          }
         }
       }
     }

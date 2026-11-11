@@ -22,6 +22,7 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Psychology
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.filled.Security
+import androidx.compose.material.icons.filled.Storage
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
@@ -313,6 +314,91 @@ fun SettingsScreen(
                 color = TextSecondary
               )
             }
+          }
+        }
+      }
+    }
+
+    // 5.5 SQL Database Engine & Schema Readiness
+    item {
+      SectionCard(
+        title = "SQL DATABASE ENGINE (ROOM & POSTGRESQL)",
+        icon = Icons.Default.Storage,
+        accentColor = CyberCyan
+      ) {
+        Text(
+          text = "Active SQL storage architecture powering zero-latency founder operations:",
+          style = MaterialTheme.typography.bodySmall,
+          color = TextSecondary
+        )
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        val sqlTables = listOf(
+          "projects" to "Milestones, categories, and target delivery timelines",
+          "tasks" to "Sprint tasks, agent assignments (6 roles), and priorities",
+          "chat_messages" to "Multi-turn conversations & JSON action plans",
+          "activity_logs" to "Real-time audit stream and executive history"
+        )
+
+        Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+          sqlTables.forEach { (table, desc) ->
+            Row(
+              verticalAlignment = Alignment.CenterVertically,
+              modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(8.dp))
+                .background(DarkSurfaceElevated)
+                .padding(horizontal = 10.dp, vertical = 6.dp)
+            ) {
+              Box(
+                modifier = Modifier
+                  .clip(RoundedCornerShape(4.dp))
+                  .background(CyberCyan.copy(alpha = 0.15f))
+                  .padding(horizontal = 6.dp, vertical = 2.dp)
+              ) {
+                Text(
+                  text = table,
+                  style = MaterialTheme.typography.labelSmall.copy(
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 10.sp
+                  ),
+                  color = CyberCyan
+                )
+              }
+              Spacer(modifier = Modifier.width(8.dp))
+              Text(
+                text = desc,
+                style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.sp),
+                color = TextSecondary,
+                modifier = Modifier.weight(1f)
+              )
+            }
+          }
+        }
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        Box(
+          modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(8.dp))
+            .background(Color(0xFF0D2235))
+            .border(1.dp, CyberCyan.copy(alpha = 0.3f), RoundedCornerShape(8.dp))
+            .padding(10.dp)
+        ) {
+          Column {
+            Text(
+              text = "✓ SQL Integrity: Foreign Keys Active • Cascades: ENABLED",
+              style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+              color = LaserGreen
+            )
+            Spacer(modifier = Modifier.height(2.dp))
+            Text(
+              text = "Cloud SQL for PostgreSQL / Supabase Migration: Data schemas are normalized and export-ready for remote relational database synchronization.",
+              style = MaterialTheme.typography.bodySmall.copy(fontSize = 10.sp, lineHeight = 14.sp),
+              color = TextSecondary
+            )
           }
         }
       }

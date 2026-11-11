@@ -73,6 +73,7 @@ fun CommandCenterApp(viewModel: CommandCenterViewModel) {
   val allTasks by viewModel.allTasks.collectAsState()
   val chatMessages by viewModel.chatMessages.collectAsState()
   val activePersona by viewModel.activePersona.collectAsState()
+  val selectedModel by viewModel.selectedModel.collectAsState()
   val chatInput by viewModel.chatInput.collectAsState()
   val isGenerating by viewModel.isGenerating.collectAsState()
   val errorMessage by viewModel.errorMessage.collectAsState()
@@ -145,11 +146,13 @@ fun CommandCenterApp(viewModel: CommandCenterViewModel) {
               CeoChatScreen(
                 chatMessages = chatMessages,
                 activePersona = activePersona,
+                selectedModel = selectedModel,
                 chatInput = chatInput,
                 isGenerating = isGenerating,
                 errorMessage = errorMessage,
                 aiService = viewModel.aiService,
                 onPersonaSelect = { persona -> viewModel.selectPersona(persona) },
+                onModelSelect = { model -> viewModel.selectModel(model) },
                 onInputChange = { text -> viewModel.updateChatInput(text) },
                 onSendMessage = { customPrompt -> viewModel.sendChatMessage(customPrompt) },
                 onApprovePlan = { message -> viewModel.approveProposedPlan(message) }

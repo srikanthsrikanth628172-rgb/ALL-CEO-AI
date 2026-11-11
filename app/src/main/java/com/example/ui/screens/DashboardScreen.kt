@@ -136,6 +136,47 @@ fun DashboardScreen(
             style = MaterialTheme.typography.bodyMedium,
             color = TextSecondary
           )
+
+          Spacer(modifier = Modifier.height(10.dp))
+
+          Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+          ) {
+            Box(
+              modifier = Modifier
+                .clip(RoundedCornerShape(6.dp))
+                .background(LaserGreen.copy(alpha = 0.15f))
+                .padding(horizontal = 8.dp, vertical = 3.dp)
+            ) {
+              Text(
+                text = "₹0 BUDGET TIER • FREE OPEN ENGINE",
+                style = MaterialTheme.typography.labelSmall.copy(
+                  fontWeight = FontWeight.Bold,
+                  fontSize = 9.sp,
+                  letterSpacing = 0.8.sp
+                ),
+                color = LaserGreen
+              )
+            }
+
+            Box(
+              modifier = Modifier
+                .clip(RoundedCornerShape(6.dp))
+                .background(CyberCyan.copy(alpha = 0.12f))
+                .padding(horizontal = 8.dp, vertical = 3.dp)
+            ) {
+              Text(
+                text = "PHASE 1: AI CEO COMMAND CENTER",
+                style = MaterialTheme.typography.labelSmall.copy(
+                  fontWeight = FontWeight.Bold,
+                  fontSize = 9.sp,
+                  letterSpacing = 0.8.sp
+                ),
+                color = CyberCyan
+              )
+            }
+          }
         }
       }
 

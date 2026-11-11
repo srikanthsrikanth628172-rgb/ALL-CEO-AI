@@ -16,7 +16,9 @@ import org.json.JSONObject
 data class AiResponse(
   val responseText: String,
   val proposedTasks: List<ProposedTask> = emptyList(),
-  val nextBestAction: String? = null
+  val nextBestAction: String? = null,
+  val isLiveAi: Boolean = true,
+  val engineNotice: String? = null
 )
 
 data class ProposedTask(
@@ -28,22 +30,20 @@ data class ProposedTask(
 class GeminiAiService(private val context: Context) {
   private val tag = "GeminiAiService"
 
-  private val model by lazy {
-    try {
-      if (com.google.firebase.FirebaseApp.getApps(context).isNotEmpty()) {
-        Firebase.ai.generativeModel(
-          modelName = "gemini-3.8-flash",
-          generationConfig = generationConfig {
-            temperature = 0.7f
-          }
-        )
-      } else {
-        null
-      }
-    } catch (e: Exception) {
-      Log.w(tag, "Firebase AI not yet provisioned: ${e.message}")
+  fun getModel(modelName: String = "gemini-3.8-flash") = try {
+    if (com.google.firebase.FirebaseApp.getApps(context).isNotEmpty()) {
+      Firebase.ai.generativeModel(
+        modelName = modelName,
+        generationConfig = generationConfig {
+          temperature = 0.7f
+        }
+      )
+    } else {
       null
     }
+  } catch (e: Exception) {
+    Log.w(tag, "Firebase AI not yet provisioned: ${e.message}")
+    null
   }
 
   suspend fun generateStrategicResponse(
@@ -51,7 +51,8 @@ class GeminiAiService(private val context: Context) {
     persona: String,
     founderName: String = "Founder",
     founderInstructions: String = "",
-    projectContext: String = ""
+    projectContext: String = "",
+    selectedModel: String = "gemini-3.8-flash"
   ): AiResponse = withContext(Dispatchers.IO) {
     val activeRole = AgentRole.entries.find { it.displayName.equals(persona, ignoreCase = true) }
     val isCeo = persona.equals("AI CEO", ignoreCase = true) || activeRole == null
@@ -82,7 +83,7 @@ class GeminiAiService(private val context: Context) {
 
     // Try calling Firebase AI Logic with 35s timeout
     try {
-      val generativeModel = model
+      val generativeModel = getModel(selectedModel)
       if (generativeModel != null) {
         val promptWithContext = "$systemDirective\n\nFounder Request: $userPrompt"
         val response = withTimeout(35000L) {
@@ -99,7 +100,9 @@ class GeminiAiService(private val context: Context) {
           return@withContext AiResponse(
             responseText = text.trim(),
             proposedTasks = parsedTasks,
-            nextBestAction = nextAction
+            nextBestAction = nextAction,
+            isLiveAi = true,
+            engineNotice = null
           )
         }
       }
@@ -107,8 +110,12 @@ class GeminiAiService(private val context: Context) {
       Log.i(tag, "Firebase AI offline or unprovisioned, using intelligent command center engine: ${e.localizedMessage}")
     }
 
-    // High-fidelity executive fallback engine
-    generateDeterministicExecutiveResponse(userPrompt, persona, activeRole, founderName)
+    // High-fidelity executive fallback engine (₹0 Free Tier / Offline Safe Mode)
+    val fallback = generateDeterministicExecutiveResponse(userPrompt, persona, activeRole, founderName)
+    fallback.copy(
+      isLiveAi = false,
+      engineNotice = "₹0 Offline Executive Engine Active — Gemini cloud API currently unprovisioned or offline; running structured on-device solo founder protocols."
+    )
   }
 
   private fun extractProposedTasks(text: String): List<ProposedTask> {

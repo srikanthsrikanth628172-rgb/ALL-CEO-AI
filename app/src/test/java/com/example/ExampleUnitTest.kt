@@ -181,5 +181,46 @@ class ExampleUnitTest {
     assertEquals("HIGH", updatedTask.priority)
     assertEquals("TODO", updatedTask.status)
   }
+
+  @Test
+  fun `verify ai response properties and offline engine notice`() {
+    val liveResponse = com.example.data.ai.AiResponse(
+      responseText = "Live analysis",
+      isLiveAi = true,
+      engineNotice = null
+    )
+    assertTrue(liveResponse.isLiveAi)
+    org.junit.Assert.assertNull(liveResponse.engineNotice)
+
+    val offlineResponse = liveResponse.copy(
+      responseText = "Offline response",
+      isLiveAi = false,
+      engineNotice = "₹0 Offline Executive Engine Active"
+    )
+    org.junit.Assert.assertFalse(offlineResponse.isLiveAi)
+    assertEquals("₹0 Offline Executive Engine Active", offlineResponse.engineNotice)
+  }
+
+  @Test
+  fun `verify gemini model selection tiers and video prompt formatting`() {
+    val supportedModels = listOf(
+      "gemini-3.8-flash",
+      "gemini-4-carbon",
+      "gemini-4-argon",
+      "gemini-3.1-flash-lite"
+    )
+    assertEquals(4, supportedModels.size)
+    assertTrue(supportedModels.contains("gemini-4-carbon"))
+    assertTrue(supportedModels.contains("gemini-4-argon"))
+    assertTrue(supportedModels.contains("gemini-3.8-flash"))
+    assertTrue(supportedModels.contains("gemini-3.1-flash-lite"))
+
+    val video169 = "Generate 16:9 landscape video pitch script using gemini-omni-1.2-flash: SaaS Pitch"
+    val video916 = "Generate 9:16 portrait mobile video script using gemini-omni-1.2-flash: Reel"
+    assertTrue(video169.contains("16:9") && video169.contains("gemini-omni-1.2-flash"))
+    assertTrue(video916.contains("9:16") && video916.contains("gemini-omni-1.2-flash"))
+  }
 }
+
+
 

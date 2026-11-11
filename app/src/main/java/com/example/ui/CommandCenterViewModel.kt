@@ -41,6 +41,14 @@ class CommandCenterViewModel(application: Application) : AndroidViewModel(applic
   private val _activePersona = MutableStateFlow("AI CEO")
   val activePersona: StateFlow<String> = _activePersona.asStateFlow()
 
+  // Active Gemini AI Model Tier
+  private val _selectedModel = MutableStateFlow("gemini-3.8-flash")
+  val selectedModel: StateFlow<String> = _selectedModel.asStateFlow()
+
+  fun selectModel(modelName: String) {
+    _selectedModel.value = modelName
+  }
+
   // Chat input and generation state
   private val _chatInput = MutableStateFlow("")
   val chatInput: StateFlow<String> = _chatInput.asStateFlow()
@@ -162,18 +170,25 @@ class CommandCenterViewModel(application: Application) : AndroidViewModel(applic
           persona = persona,
           founderName = settings.founderName,
           founderInstructions = settings.customAiInstructions,
-          projectContext = projectsSummary
+          projectContext = projectsSummary,
+          selectedModel = _selectedModel.value
         )
 
         val proposedJson = if (response.proposedTasks.isNotEmpty()) {
           aiService.serializeTasksToJson(response.proposedTasks)
         } else null
 
+        val finalMessageText = if (!response.isLiveAi && response.engineNotice != null) {
+          "${response.responseText}\n\n⚡ *${response.engineNotice}*"
+        } else {
+          response.responseText
+        }
+
         repository.insertChatMessage(
           ChatMessageEntity(
             sender = "AI",
             persona = persona,
-            text = response.responseText,
+            text = finalMessageText,
             proposedTasksJson = proposedJson,
             isApproved = false,
             timestamp = System.currentTimeMillis()
